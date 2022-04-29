@@ -70,6 +70,14 @@ def pretty_format_java(argv: typing.Optional[typing.List[str]] = None) -> int:
         dest="aosp",
         help="Formats Java code into AOSP format",
     )
+    parser.add_argument(
+        "--only-filenames",
+        action="store_true",
+        dest="only_filenames",
+        default=False,
+        help="Only formats the passed filenames. "
+        "If no filename is passed, nothing happens, and will not fail even if prerequisites are missing.",
+    )
 
     parser.add_argument("filenames", nargs="*", help="Filenames to fix")
     args = parser.parse_args(argv)
@@ -107,19 +115,23 @@ def pretty_format_java(argv: typing.Optional[typing.List[str]] = None) -> int:
         cmd_args.append("--replace")
     else:
         cmd_args.append("--dry-run")
-    status, output = run_command(*(cmd_args + args.filenames))
+    if not args.only_filenames or len(args.filenames) > 0:
+        status, output = run_command(*(cmd_args + args.filenames))
 
-    if output:
-        print(
-            "{}: {}".format(
-                "The following files have been fixed by google-java-formatter"
-                if args.autofix
-                else "The following files are not properly formatted",  # noqa
-                ", ".join(output.splitlines()),
-            ),
-        )
+        if output:
+            print(
+                "{}: {}".format(
+                    "The following files have been fixed by google-java-formatter"
+                    if args.autofix
+                    else "The following files are not properly formatted",  # noqa
+                    ", ".join(output.splitlines()),
+                ),
+            )
 
-    return 0 if status == 0 else 1
+        return 0 if status == 0 else 1
+    else:
+        print("No files found to format. Skipping.")
+        return 0
 
 
 if __name__ == "__main__":

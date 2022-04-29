@@ -48,6 +48,9 @@ def test__download_google_java_formatter_jar(ensure_download_possible, version):
         (["pretty-formatted.java"], 0),
         (["not-pretty-formatted.java"], 1),
         (["not-pretty-formatted_fixed.java"], 0),
+        (["--only-filenames", "invalid.java"], 1),
+        (["--only-filenames", "pretty-formatted.java"], 0),
+        (["--only-filenames"], 0),
     ),
 )
 def test_pretty_format_java(undecorate_method, cli_args, expected_retval):
